@@ -33,6 +33,7 @@ class CameraInfo(NamedTuple):
     image_path: str
     image_name: str
     depth_path: str
+    mask_path: str
     width: int
     height: int
     is_test: bool
@@ -108,9 +109,12 @@ def readColmapCameras(cam_extrinsics, cam_intrinsics, depths_params, images_fold
         image_path = os.path.join(images_folder, extr.name)
         image_name = extr.name
         depth_path = os.path.join(depths_folder, f"{extr.name[:-n_remove]}.png") if depths_folder != "" else ""
+        # Mask in 'masks' folder with same name as image
+        masks_folder = os.path.join(os.path.dirname(depths_folder), "masks") if depths_folder != "" else ""
+        mask_path = os.path.join(masks_folder, extr.name) if masks_folder != "" else ""
 
         cam_info = CameraInfo(uid=uid, R=R, T=T, FovY=FovY, FovX=FovX, depth_params=depth_params,
-                              image_path=image_path, image_name=image_name, depth_path=depth_path,
+                              image_path=image_path, image_name=image_name, depth_path=depth_path, mask_path=mask_path,
                               width=width, height=height, is_test=image_name in test_cam_names_list)
         cam_infos.append(cam_info)
 
@@ -263,10 +267,12 @@ def readCamerasFromTransforms(path, transformsfile, depths_folder, white_backgro
             FovX = fovx
 
             depth_path = os.path.join(depths_folder, f"{image_name}.png") if depths_folder != "" else ""
+            masks_folder = os.path.join(os.path.dirname(depths_folder), "masks") if depths_folder != "" else ""
+            mask_path = os.path.join(masks_folder, f"{image_name}.png") if masks_folder != "" else ""
 
             cam_infos.append(CameraInfo(uid=idx, R=R, T=T, FovY=FovY, FovX=FovX,
                             image_path=image_path, image_name=image_name,
-                            width=image.size[0], height=image.size[1], depth_path=depth_path, depth_params=None, is_test=is_test))
+                            width=image.size[0], height=image.size[1], depth_path=depth_path, mask_path=mask_path, depth_params=None, is_test=is_test))
             
     return cam_infos
 

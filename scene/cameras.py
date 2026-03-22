@@ -20,7 +20,7 @@ class Camera(nn.Module):
     def __init__(self, resolution, colmap_id, R, T, FoVx, FoVy, depth_params, image, invdepthmap,
                  image_name, uid,
                  trans=np.array([0.0, 0.0, 0.0]), scale=1.0, data_device = "cuda",
-                 train_test_exp = False, is_test_dataset = False, is_test_view = False
+                 train_test_exp = False, is_test_dataset = False, is_test_view = False, depthmask = None
                  ):
         super(Camera, self).__init__()
 
@@ -60,7 +60,12 @@ class Camera(nn.Module):
         self.invdepthmap = None
         self.depth_reliable = False
         if invdepthmap is not None:
-            self.depth_mask = torch.ones_like(self.alpha_mask)
+            # Use provided depth mask, or default to all ones
+            if depthmask is not None:
+                loaded_mask = cv2.resize(depthmask, resolution)
+                self.depth_mask = torch.from_numpy(loaded_mask[None]).to(self.data_device)
+            else:
+                self.depth_mask = torch.ones_like(self.alpha_mask)
             self.invdepthmap = cv2.resize(invdepthmap, resolution)
             self.invdepthmap[self.invdepthmap < 0] = 0
             self.depth_reliable = True
