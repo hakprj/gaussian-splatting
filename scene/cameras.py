@@ -63,6 +63,7 @@ class Camera(nn.Module):
             # Use provided depth mask, or default to all ones
             if depthmask is not None:
                 loaded_mask = cv2.resize(depthmask, resolution)
+                print("Loaded depth mask with shape:", loaded_mask.shape)
                 self.depth_mask = torch.from_numpy(loaded_mask[None]).to(self.data_device)
             else:
                 self.depth_mask = torch.ones_like(self.alpha_mask)
