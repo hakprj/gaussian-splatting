@@ -140,6 +140,7 @@ def training(dataset, opt, pipe, testing_iterations, saving_iterations, checkpoi
             print(f"rendered depth: min={invDepth.min().item():.4f} max={invDepth.max().item():.4f}")
             print(f"mono depth: min={mono_invdepth.min().item():.4f} max={mono_invdepth.max().item():.4f}")
             depth_mask = viewpoint_cam.depth_mask.cuda()
+            print(f"depth mask: min={depth_mask.min().item():.4f} max={depth_mask.max().item():.4f} mean={depth_mask.mean().item():.4f} nonzero={(depth_mask > 0).sum().item()}/{depth_mask.numel()}")
             Ll1depth_pure = torch.abs((invDepth  - mono_invdepth) * depth_mask).sum() / depth_mask.sum().clamp(min=1)
             Ll1depth = depth_l1_weight(iteration) * Ll1depth_pure 
             loss += Ll1depth
