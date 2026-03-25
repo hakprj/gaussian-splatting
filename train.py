@@ -18,6 +18,8 @@ import sys
 from scene import Scene, GaussianModel
 from utils.general_utils import safe_state, get_expon_lr_func
 import uuid
+import numpy as np
+import cv2
 from tqdm import tqdm
 from utils.image_utils import psnr
 from argparse import ArgumentParser, Namespace
@@ -129,11 +131,12 @@ def training(dataset, opt, pipe, testing_iterations, saving_iterations, checkpoi
         Ll1depth_pure = 0.0
         if depth_l1_weight(iteration) > 0 and viewpoint_cam.depth_reliable:
             invDepth = render_pkg["depth"]
-            mono_invdepth = viewpoint_cam.invdepthmap.cuda()
-            depth_mask = viewpoint_cam.depth_mask.cuda()
-            print(depth_mask)
 
-            Ll1depth_pure = torch.abs((invDepth  - mono_invdepth) * depth_mask).mean()
+            cv2.imwrite(os.path.join(scene.model_path, "debug_depth_{}.png".format(iteration)), (invDepth.cpu().numpy() * 255).astype(np.uint8))
+            mono_invdepth = viewpoint_cam.invdepthmap.cuda()
+
+            depth_mask = viewpoint_cam.depth_mask.cuda()
+            Ll1depth_pure = torch.abs((invDepth  - mono_invdepth) * depth_mask).sum() / depth_mask.sum().clamp(min=1)
             Ll1depth = depth_l1_weight(iteration) * Ll1depth_pure 
             loss += Ll1depth
             Ll1depth = Ll1depth.item()
