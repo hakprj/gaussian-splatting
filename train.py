@@ -132,7 +132,7 @@ def training(dataset, opt, pipe, testing_iterations, saving_iterations, checkpoi
         if depth_l1_weight(iteration) > 0 and viewpoint_cam.depth_reliable:
             invDepth = render_pkg["depth"]
 
-            cv2.imwrite(os.path.join(scene.model_path, "debug_depth_{}.png".format(iteration)), (invDepth.cpu().numpy() * 255).astype(np.uint8))
+            cv2.imwrite(os.path.join(scene.model_path, "debug_depth_{}.png".format(iteration)), (invDepth.detach().cpu().numpy().squeeze() * 255).astype(np.uint8))
             mono_invdepth = viewpoint_cam.invdepthmap.cuda()
 
             depth_mask = viewpoint_cam.depth_mask.cuda()
