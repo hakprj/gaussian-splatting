@@ -137,6 +137,8 @@ def training(dataset, opt, pipe, testing_iterations, saving_iterations, checkpoi
             mono_invdepth = viewpoint_cam.invdepthmap.cuda()
             cv2.imwrite(os.path.join(scene.model_path, "debug_mono_depth_{}.png".format(iteration)), (mono_invdepth.detach().cpu().numpy().squeeze() * 255).astype(np.uint8))
 
+            print(f"rendered depth: min={invDepth.min().item():.4f} max={invDepth.max().item():.4f}")
+            print(f"mono depth: min={mono_invdepth.min().item():.4f} max={mono_invdepth.max().item():.4f}")
             depth_mask = viewpoint_cam.depth_mask.cuda()
             Ll1depth_pure = torch.abs((invDepth  - mono_invdepth) * depth_mask).sum() / depth_mask.sum().clamp(min=1)
             Ll1depth = depth_l1_weight(iteration) * Ll1depth_pure 
