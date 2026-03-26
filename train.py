@@ -151,7 +151,8 @@ def training(dataset, opt, pipe, testing_iterations, saving_iterations, checkpoi
                 invDepth = render_pkg["depth"]
 
 
-                cv2.imwrite(os.path.join(scene.model_path, "debug_mono_depth_{}.png".format(iteration)), (mono_invdepth.detach().cpu().numpy().squeeze() * 255).astype(np.uint8))
+                cv2.imwrite(os.path.join(scene.model_path, "debug_depth_{}.png".format(iteration)), (invDepth.detach().cpu().numpy().squeeze() * 255).astype(np.uint8))
+
 
 
         loss.backward()
