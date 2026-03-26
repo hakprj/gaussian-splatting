@@ -153,7 +153,6 @@ def training(dataset, opt, pipe, testing_iterations, saving_iterations, checkpoi
 
                 cv2.imwrite(os.path.join(scene.model_path, "debug_mono_depth_{}.png".format(iteration)), (mono_invdepth.detach().cpu().numpy().squeeze() * 255).astype(np.uint8))
 
-            Ll1depth_pure = torch.abs((invDepth  - mono_invdepth) * depth_mask).sum() / depth_mask.sum().clamp(min=1)
 
         loss.backward()
 
