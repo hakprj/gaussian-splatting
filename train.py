@@ -150,13 +150,9 @@ def training(dataset, opt, pipe, testing_iterations, saving_iterations, checkpoi
             if iteration % 1000 == 0:
                 invDepth = render_pkg["depth"]
 
-                cv2.imwrite(os.path.join(scene.model_path, "debug_depth_{}.png".format(iteration)), (invDepth.detach().cpu().numpy().squeeze() * 255).astype(np.uint8))
 
                 cv2.imwrite(os.path.join(scene.model_path, "debug_mono_depth_{}.png".format(iteration)), (mono_invdepth.detach().cpu().numpy().squeeze() * 255).astype(np.uint8))
 
-                print(f"rendered depth: min={invDepth.min().item():.4f} max={invDepth.max().item():.4f}")
-                print(f"mono depth: min={mono_invdepth.min().item():.4f} max={mono_invdepth.max().item():.4f}")
-                print(f"depth mask: min={depth_mask.min().item():.4f} max={depth_mask.max().item():.4f} mean={depth_mask.mean().item():.4f} nonzero={(depth_mask > 0).sum().item()}/{depth_mask.numel()}")
             Ll1depth_pure = torch.abs((invDepth  - mono_invdepth) * depth_mask).sum() / depth_mask.sum().clamp(min=1)
 
         loss.backward()
