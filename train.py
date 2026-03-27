@@ -137,7 +137,7 @@ def training(dataset, opt, pipe, testing_iterations, saving_iterations, checkpoi
                 cv2.imwrite(os.path.join(scene.model_path, "debug_depth_{}.png".format(iteration)), (invDepth.detach().cpu().numpy().squeeze() * 255).astype(np.uint8))
 
                 cv2.imwrite(os.path.join(scene.model_path, "debug_mono_depth_{}.png".format(iteration)), (mono_invdepth.detach().cpu().numpy().squeeze() * 255).astype(np.uint8))
-
+                cv2.imwrite(os.path.join(scene.model_path, "debug_depth_mask_{}.png".format(iteration)), (depth_mask.detach().cpu().numpy().squeeze() * 255).astype(np.uint8))
                 print(f"rendered depth: min={invDepth.min().item():.4f} max={invDepth.max().item():.4f}")
                 print(f"mono depth: min={mono_invdepth.min().item():.4f} max={mono_invdepth.max().item():.4f}")
                 print(f"depth mask: min={depth_mask.min().item():.4f} max={depth_mask.max().item():.4f} mean={depth_mask.mean().item():.4f} nonzero={(depth_mask > 0).sum().item()}/{depth_mask.numel()}")
