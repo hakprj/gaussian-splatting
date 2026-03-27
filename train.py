@@ -141,9 +141,25 @@ def training(dataset, opt, pipe, testing_iterations, saving_iterations, checkpoi
                 print(f"rendered depth: min={invDepth.min().item():.4f} max={invDepth.max().item():.4f}")
                 print(f"mono depth: min={mono_invdepth.min().item():.4f} max={mono_invdepth.max().item():.4f}")
                 print(f"depth mask: min={depth_mask.min().item():.4f} max={depth_mask.max().item():.4f} mean={depth_mask.mean().item():.4f} nonzero={(depth_mask > 0).sum().item()}/{depth_mask.numel()}")
-            Ll1depth_pure = torch.abs((invDepth  - mono_invdepth) * depth_mask).sum() / depth_mask.sum().clamp(min=1)
-            Ll1depth = depth_l1_weight(iteration) * Ll1depth_pure 
-            loss += Ll1depth*0
+            # Per-iteration alignment: find scale & shift to map mono into rendered depth space
+            mask_bool = (depth_mask.squeeze() > 0)
+            r = invDepth.squeeze()[mask_bool].detach()
+            m = mono_invdepth.squeeze()[mask_bool].detach()
+            if r.numel() > 10:
+                A = torch.stack([m, torch.ones_like(m)], dim=1)
+                lstsq_result = torch.linalg.lstsq(A, r.unsqueeze(1)).solution
+                mono_aligned = lstsq_result[0] * mono_invdepth + lstsq_result[1]
+                if iteration % 1000 == 0:
+                    print(f"depth align: scale={lstsq_result[0].item():.4f} shift={lstsq_result[1].item():.4f}")
+                    print(f"mono_aligned: min={mono_aligned.min().item():.4f} max={mono_aligned.max().item():.4f}")
+                    print(f"residual L1={torch.abs(r - (lstsq_result[0] * m + lstsq_result[1])).mean().item():.6f}")
+            else:
+                mono_aligned = mono_invdepth
+                if iteration % 1000 == 0:
+                    print(f"depth align: SKIPPED (only {r.numel()} valid pixels)")
+            Ll1depth_pure = torch.abs((invDepth - mono_aligned) * depth_mask).sum() / depth_mask.sum().clamp(min=1)
+            Ll1depth = depth_l1_weight(iteration) * Ll1depth_pure
+            loss += Ll1depth
             Ll1depth = Ll1depth.item()
         else:
             Ll1depth = 0
