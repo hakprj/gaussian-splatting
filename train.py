@@ -160,7 +160,7 @@ def training(dataset, opt, pipe, testing_iterations, saving_iterations, checkpoi
             Ll1depth_pure = torch.abs((invDepth - mono_aligned) * depth_mask).sum() / depth_mask.sum().clamp(min=1)
             # Penalize stray Gaussians rendering depth in background (outside mask)
             bg_mask = (depth_mask.squeeze() == 0)
-            if bg_mask.any():
+            if False:
                 Ll1depth_bg = invDepth.squeeze()[bg_mask].abs().mean()
                 Ll1depth_pure = Ll1depth_pure + 0.5 * Ll1depth_bg
                 if iteration % 1000 == 0:
