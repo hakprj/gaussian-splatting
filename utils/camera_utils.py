@@ -42,6 +42,7 @@ def loadCam(args, id, cam_info, resolution_scale, is_nerf_synthetic, is_test_dat
 
     # Load depth mask if available
     if cam_info.mask_path != "" and os.path.exists(cam_info.mask_path):
+        print("Loading depth mask from:", cam_info.mask_path)
         try:
             depthmask = cv2.imread(cam_info.mask_path, cv2.IMREAD_GRAYSCALE).astype(np.float32) / 255.0
         except Exception as e:

@@ -44,6 +44,7 @@ class Camera(nn.Module):
         self.alpha_mask = None
         if resized_image_rgb.shape[0] == 4:
             self.alpha_mask = resized_image_rgb[3:4, ...].to(self.data_device)
+            print("read alpha mask from image with shape:", self.alpha_mask.shape)
         else: 
             self.alpha_mask = torch.ones_like(resized_image_rgb[0:1, ...].to(self.data_device))
 
@@ -66,6 +67,7 @@ class Camera(nn.Module):
                 print("Loaded depth mask with shape:", loaded_mask.shape)
                 self.depth_mask = torch.from_numpy(loaded_mask[None]).to(self.data_device)
             else:
+                print("applying alpha mask as depth mask")
                 self.depth_mask = torch.ones_like(self.alpha_mask)
             self.invdepthmap = cv2.resize(invdepthmap, resolution)
             self.invdepthmap[self.invdepthmap < 0] = 0
