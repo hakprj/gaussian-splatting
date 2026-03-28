@@ -133,6 +133,8 @@ def training(dataset, opt, pipe, testing_iterations, saving_iterations, checkpoi
             invDepth = render_pkg["depth"]
             mono_invdepth = viewpoint_cam.invdepthmap.cuda()
             depth_mask = viewpoint_cam.depth_mask.cuda()
+            print(f"Depth mask stats: min={depth_mask.min().item():.4f} max={depth_mask.max().item():.4f} mean={depth_mask.mean().item():.4f} nonzero={(depth_mask > 0).sum().item()}/{depth_mask.numel()}")
+            
 
             Ll1depth_pure = torch.abs((invDepth  - mono_invdepth) * depth_mask).mean()
             Ll1depth = depth_l1_weight(iteration) * Ll1depth_pure 
