@@ -133,6 +133,23 @@ def training(dataset, opt, pipe, testing_iterations, saving_iterations, checkpoi
             invDepth = render_pkg["depth"]
             mono_invdepth = viewpoint_cam.invdepthmap.cuda()
             depth_mask = viewpoint_cam.depth_mask.cuda()
+
+            Ll1depth_pure = torch.abs((invDepth  - mono_invdepth) * depth_mask).mean()
+            Ll1depth = depth_l1_weight(iteration) * Ll1depth_pure 
+            loss += Ll1depth
+            Ll1depth = Ll1depth.item()
+            if iteration % 1000 == 0:
+                print(f"Depth L1: {Ll1depth:.6f} (pure {Ll1depth_pure.item():.6f})")
+                cv2.imwrite(os.path.join(scene.model_path, "debug_depth_{}.png".format(iteration)), (invDepth.detach().cpu().numpy().squeeze() * 255).astype(np.uint8))
+
+                cv2.imwrite(os.path.join(scene.model_path, "debug_mono_depth_{}.png".format(iteration)), (mono_invdepth.detach().cpu().numpy().squeeze() * 255).astype(np.uint8))
+                cv2.imwrite(os.path.join(scene.model_path, "debug_depth_mask_{}.png".format(iteration)), (depth_mask.detach().cpu().numpy().squeeze() * 255).astype(np.uint8))
+
+
+        elif depth_l1_weight(iteration) > 0 and viewpoint_cam.depth_reliable and False:
+            invDepth = render_pkg["depth"]
+            mono_invdepth = viewpoint_cam.invdepthmap.cuda()
+            depth_mask = viewpoint_cam.depth_mask.cuda()
             if iteration % 1000 == 0:
                 cv2.imwrite(os.path.join(scene.model_path, "debug_depth_{}.png".format(iteration)), (invDepth.detach().cpu().numpy().squeeze() * 255).astype(np.uint8))
 
@@ -162,7 +179,7 @@ def training(dataset, opt, pipe, testing_iterations, saving_iterations, checkpoi
             bg_mask = (depth_mask.squeeze() == 0)
             if bg_mask.any():
                 Ll1depth_bg = invDepth.squeeze()[bg_mask].abs().mean()
-                Ll1depth_pure = Ll1depth_pure +  1.5*Ll1depth_bg
+                Ll1depth_pure = Ll1depth_pure +  2*Ll1depth_bg
                 if iteration % 1000 == 0:
                     print(f"bg depth penalty: mean={Ll1depth_bg.item():.6f}")
             Ll1depth = depth_l1_weight(iteration) * Ll1depth_pure
