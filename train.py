@@ -129,7 +129,7 @@ def training(dataset, opt, pipe, testing_iterations, saving_iterations, checkpoi
 
         # Depth regularization
         Ll1depth_pure = 0.0
-        if depth_l1_weight(iteration) > 0 and viewpoint_cam.depth_reliable:
+        if depth_l1_weight(iteration) > 0 and viewpoint_cam.depth_reliable and False:
             invDepth = render_pkg["depth"]
             mono_invdepth = viewpoint_cam.invdepthmap.cuda()
             depth_mask = viewpoint_cam.depth_mask.cuda()
@@ -148,7 +148,7 @@ def training(dataset, opt, pipe, testing_iterations, saving_iterations, checkpoi
                 cv2.imwrite(os.path.join(scene.model_path, "debug_depth_mask_{}.png".format(iteration)), (depth_mask.detach().cpu().numpy().squeeze() * 255).astype(np.uint8))
 
 
-        elif depth_l1_weight(iteration) > 0 and viewpoint_cam.depth_reliable and False:
+        elif depth_l1_weight(iteration) > 0 and viewpoint_cam.depth_reliable:
             invDepth = render_pkg["depth"]
             mono_invdepth = viewpoint_cam.invdepthmap.cuda()
             depth_mask = viewpoint_cam.depth_mask.cuda()
